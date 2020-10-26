@@ -10,6 +10,7 @@ import lombok.ToString;
 public class Transacao {
 	private Long id;
 	private String mesExtrato;
+	private String dataTransacao;
 	private String valorTransacao;
 	private Estabelecimento estabelecimento;
 	private UnidadeGestora unidadeGestora;

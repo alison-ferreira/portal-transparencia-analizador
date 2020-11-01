@@ -54,9 +54,8 @@ public class UnloadCardsTransactions implements ApplicationListener<ApplicationR
 		
 		logger.info("Retrieving from Government API.");
 		Flux.interval(this.getDuration()).filter(i -> i > 0)
-//		Flux.range(270, 10)
 			.flatMap(this::getTransactionsByPage).log()
-			.takeUntil(t -> t == null)
+			.takeWhile(t -> t.getId() != null)
 			.doOnError(e -> logger.error(e.getMessage()))
 			.doOnComplete(() -> logger.info("All data has been retrived from Government API."))
 			.subscribe(t -> this.saveTransaction(t), 
@@ -73,7 +72,8 @@ public class UnloadCardsTransactions implements ApplicationListener<ApplicationR
 					.queryParam("pagina", page.toString())
 					.build())
 			.retrieve()
-			.bodyToFlux(TransacaoVO.class);
+			.bodyToFlux(TransacaoVO.class)
+			.defaultIfEmpty(new TransacaoVO());
 	}
 	
 	private void saveTransaction(TransacaoVO transacaoVO) {

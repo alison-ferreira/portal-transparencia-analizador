@@ -14,10 +14,18 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import br.com.transparencia.jpa.entity.Cnae;
+import br.com.transparencia.jpa.entity.OrgaoMaximo;
 import br.com.transparencia.jpa.entity.Transacao;
 import br.com.transparencia.jpa.respository.CnaeRepository;
-import br.com.transparencia.jpa.respository.EstabelecimentoRepository;
+import br.com.transparencia.jpa.respository.OrgaoMaximoRepository;
 import br.com.transparencia.jpa.respository.TransacaoRepository;
+import br.com.transparencia.vo.TransacaoVO;
 import reactor.core.publisher.Flux;
 
 @Component
@@ -29,10 +37,10 @@ public class UnloadCardsTransactions implements ApplicationListener<ApplicationR
 	TransacaoRepository transacaoRepository;
 	
 	@Autowired
-	EstabelecimentoRepository estabelecimentoRepository;
+	CnaeRepository cnaeRepository;
 	
 	@Autowired
-	CnaeRepository cnaeRepository;
+	OrgaoMaximoRepository orgaoMaximoRepository;
 
 	private WebClient client = WebClient.builder()
 				.baseUrl("http://www.portaltransparencia.gov.br")
@@ -46,14 +54,16 @@ public class UnloadCardsTransactions implements ApplicationListener<ApplicationR
 		
 		logger.info("Retrieving from Government API.");
 		Flux.interval(this.getDuration()).filter(i -> i > 0)
+//		Flux.range(270, 10)
 			.flatMap(this::getTransactionsByPage).log()
-			.takeUntil(t -> t.getId() == null)
+			.takeUntil(t -> t == null)
 			.doOnError(e -> logger.error(e.getMessage()))
-			.subscribe(t -> this.saveEntities(t), 
+			.doOnComplete(() -> logger.info("All data has been retrived from Government API."))
+			.subscribe(t -> this.saveTransaction(t), 
 					e -> logger.error(e.getMessage()));
 	}
 	
-	private Flux<Transacao> getTransactionsByPage(Long page) {
+	private Flux<TransacaoVO> getTransactionsByPage(Long page) {
 		logger.info("GET page: " + page.toString());
 		
 		return client.get()
@@ -63,13 +73,33 @@ public class UnloadCardsTransactions implements ApplicationListener<ApplicationR
 					.queryParam("pagina", page.toString())
 					.build())
 			.retrieve()
-			.bodyToFlux(Transacao.class);
+			.bodyToFlux(TransacaoVO.class);
 	}
 	
-	private void saveEntities(Transacao transacao) {
-		cnaeRepository.save(transacao.getEstabelecimento().getCnae());
-		estabelecimentoRepository.save(transacao.getEstabelecimento());
-		transacaoRepository.save(transacao);
+	private void saveTransaction(TransacaoVO transacaoVO) {
+		try {
+			ObjectMapper mapper = new ObjectMapper();
+			mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+			
+			String cnaeJson = mapper.writeValueAsString(transacaoVO.getEstabelecimento().getCnae());
+			Cnae cnae = mapper.readValue(cnaeJson, Cnae.class);
+			cnaeRepository.save(cnae);
+			
+			String orgaoMaximoJson = mapper.writeValueAsString(transacaoVO.getUnidadeGestora().getOrgaoVinculado().getOrgaoMaximo());
+			OrgaoMaximo orgaoMaximo = mapper.readValue(orgaoMaximoJson, OrgaoMaximo.class);
+			orgaoMaximoRepository.save(orgaoMaximo);
+			
+			String transacaoJson = mapper.writeValueAsString(transacaoVO);
+			Transacao transacao;
+			transacao = mapper.readValue(transacaoJson, Transacao.class);
+			transacao.setCnae(cnae);
+			transacao.setOrgaoMaximo(orgaoMaximo);
+			transacaoRepository.save(transacao);
+		} catch (JsonMappingException e) {
+			logger.error("saveEntities => {}", e.getMessage());
+		} catch (JsonProcessingException e) {
+			logger.error("saveEntities => {}", e.getMessage());
+		}
 	}
 	
 	private Duration getDuration() {

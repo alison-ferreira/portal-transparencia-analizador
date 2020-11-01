@@ -1,4 +1,4 @@
-package br.com.transparencia.jpa.entity;
+package br.com.transparencia.vo;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -7,10 +7,10 @@ import lombok.ToString;
 @Data
 @NoArgsConstructor
 @ToString
-public class OrgaoVinculado {
+public class OrgaoVinculadoVO {
 	private String nome;
 	private String cnpj;
 	private String sigla;
 	private String descricaoPoder;
-	private OrgaoMaximo orgaoMaximo;
+	private OrgaoMaximoVO orgaoMaximo;
 }

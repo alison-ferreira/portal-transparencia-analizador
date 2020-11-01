@@ -1,7 +1,4 @@
-package br.com.transparencia.jpa.entity;
-
-import javax.persistence.Entity;
-import javax.persistence.Id;
+package br.com.transparencia.vo;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,9 +7,7 @@ import lombok.ToString;
 @Data
 @NoArgsConstructor
 @ToString
-@Entity(name = "cnaes")
-public class Cnae {
-	@Id
+public class CnaeVO {
 	private String codigoDivisao;
 	private String divisao;
 }

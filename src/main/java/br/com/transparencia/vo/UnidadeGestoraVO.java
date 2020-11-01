@@ -1,4 +1,4 @@
-package br.com.transparencia.jpa.entity;
+package br.com.transparencia.vo;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -7,8 +7,8 @@ import lombok.ToString;
 @Data
 @NoArgsConstructor
 @ToString
-public class UnidadeGestora {
+public class UnidadeGestoraVO {
 	private String codigo;
 	private String nome;
-	private OrgaoVinculado orgaoVinculado;
+	private OrgaoVinculadoVO orgaoVinculado;
 }

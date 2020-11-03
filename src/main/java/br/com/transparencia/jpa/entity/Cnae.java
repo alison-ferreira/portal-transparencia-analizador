@@ -1,5 +1,7 @@
 package br.com.transparencia.jpa.entity;
 
+import java.math.BigDecimal;
+
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
@@ -15,4 +17,5 @@ public class Cnae {
 	@Id
 	private String codigoDivisao;
 	private String divisao;
+	private BigDecimal soma;
 }

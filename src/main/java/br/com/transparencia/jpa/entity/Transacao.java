@@ -5,6 +5,8 @@ import java.math.BigDecimal;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.NamedNativeQueries;
+import javax.persistence.NamedNativeQuery;
 import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 
@@ -19,6 +21,15 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 @Entity(name = "transacoes")
+@NamedNativeQueries({
+	@NamedNativeQuery(
+			name = "Transacao.getSumPerCnae",
+			query = "SELECT SUM(valor_transacao) soma, codigo_divisao, divisao "
+					+ "FROM transacoes INNER JOIN cnaes ON id_cnae = codigo_divisao "
+					+ "GROUP BY codigo_divisao, divisao "
+					+ "ORDER BY 1 DESC", 
+			resultClass = Cnae.class)
+})
 public class Transacao {
 	@Id
 	private Long id;

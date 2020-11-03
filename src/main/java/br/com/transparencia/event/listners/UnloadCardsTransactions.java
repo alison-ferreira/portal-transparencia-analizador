@@ -96,9 +96,9 @@ public class UnloadCardsTransactions implements ApplicationListener<ApplicationR
 			transacao.setOrgaoMaximo(orgaoMaximo);
 			transacaoRepository.save(transacao);
 		} catch (JsonMappingException e) {
-			logger.error("saveEntities => {}", e.getMessage());
+			logger.error("saveTransaction => {}", e.getMessage());
 		} catch (JsonProcessingException e) {
-			logger.error("saveEntities => {}", e.getMessage());
+			logger.error("saveTransaction => {}", e.getMessage());
 		}
 	}
 	

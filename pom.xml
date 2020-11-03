@@ -9,10 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>br.com.transparencia</groupId>
-	<artifactId>TransparenciaExporter</artifactId>
+	<artifactId>TransparenciaAnalisador</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>TransparenciaExporter</name>
-	<description>Exports Government Data</description>
+	<name>Portal da Transparencia - Analisador</name>
+	<description>Analisador de dados para o Portal da Transparência do Governo Federal.</description>
 
 	<properties>
 		<java.version>1.8</java.version>
